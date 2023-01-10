@@ -1,0 +1,171 @@
+---•	Member 3: Responsible for the Menu Items and Restaurant Inventory tables. Must create these tables.
+---9.	Create menu item: Given a cuisine type id, create a menu item (name and price) for that cuisine type. Use the function FIND_CUISINE_TYPE_ID (see helper functions below) first to get the ID.
+---10.	Add menu item to Restaurant Inventory: Given all pertinent information, add a menu item with a given quantity to a given restaurant in the Restaurant Inventory table. You will need to call helper functions to find IDs (see helper functions below).
+---11.	Update menu item inventory: Given a restaurant id, a menu item id, along with a given quantity, reduce the inventory of that menu item by the amount specified by the quantity. This is to keep the inventory updated every time there is an order of an item.
+---12.	Report Menu items: Generate a report to show totals of each menu item by type of cuisine. 
+
+
+
+
+
+/*
+create table menu_items (
+ menu_item_id int not null,
+ cuisine_type_id int,
+ menu_item_name varchar(30),
+ item_price float,
+ primary key (menu_item_id),
+ FOREIGN KEY (cuisine_type_id) REFERENCES Cusine_Types(cuisine_type_id)
+ );
+create table restaurant_inventory (
+ menu_item_id int,
+ restaurant_id int,
+ menu_item_name varchar(30),
+ quantity int,
+ foreign key (menu_item_id) references menu_items(menu_item_id),
+ 
+ foreign key (restaurant_id) references restauraunts(restaurant_id)
+ );
+ 
+CREATE SEQUENCE MENU_ITEM_ID_SEQ
+ MINVALUE 1
+ START WITH 1
+ INCREMENT BY 1;
+ 
+ 
+ CREATE TABLE Cusine_Types (
+ cuisine_type_id number NOT NULL ,
+ cuisine_type_name varchar(50) not null,
+ PRIMARY KEY (cuisine_type_id)
+);
+
+
+Create or replace function FIND_CUISINE_TYPE_ID(ctype_name in varchar) return 
+number
+IS
+ctype_id number;
+BEGIN
+select cuisine_type_id into ctype_id 
+from cuisine_type 
+where cuisine_type_name = ctype_name;
+    return ctype_id;
+
+
+exception 
+    when no_data_found then
+    dbms_output.put_line('No data Found, this Cuisine is not in the database');
+    WHEN OTHERS THEN 
+    DBMS_OUTPUT.PUT_LINE ('nope');
+end;
+
+
+
+Create or replace procedure add_into_menu_items(ctype_name varchar, menu_item_name 
+in varchar, price in number) is
+     m_id int;
+     ctype_id int;
+     m_name varchar;
+     price float;
+Begin
+    m_id := FIND_MENU_ITEM_ID (menu_item_name);
+    ctype_id := FIND_CUISINE_TYPE_ID (ctype_name);
+    if m_id > 0 and ctype_id > 0 then
+    insert into menu_items VALUES(menu_item_id_seq.NEXTVAL, m_id, ctype_id,
+    m_name, price);
+    else
+        dbms_output.put_line('no such data found');
+    end if;
+End;
+
+
+
+
+begin 
+
+add_into_menu_items('American', 'burger', '10');
+add_into_menu_items('American', 'fries', '5');
+add_into_menu_items('American', 'pasta', '15');
+add_into_menu_items('American', 'salad', '10');
+add_into_menu_items('American', 'salmon', '20');
+add_into_menu_items('Italian', 'lasagna', '15');
+add_into_menu_items('Italian', 'meatballs', '10');
+add_into_menu_items('Italian', 'spaghetti', '15');
+
+add_into_menu_items('Italian', 'pizza', '20');
+
+end;
+
+
+
+Create or replace function FIND_MENU_ITEM_ID (m_name in varchar) return number
+IS
+m_id number;
+BEGIN
+    select menu_item_ID into m_id from Menu_Item where menu_item_name = m_name;
+    return m_id;
+    exception
+    when no_data_found then
+    dbms_output.put_line('no such data found');
+    return -1;
+End;
+
+
+Create or replace function FIND_RESTAURANT_ID (r_name in varchar) return number
+IS
+    r_id number;
+BEGIN
+    select restaurant_id into r_id from restaurants where restaurant_name = 
+    r_name;
+    return r_id;
+    exception
+    when no_data_found then
+    dbms_output.put_line('no such data found');
+    return -1;
+End;
+
+
+Create or replace procedure add_into_restaurant_inventory(restaurant_name varchar, 
+menu_item_name in varchar, quantity in number) IS
+     m_id int;
+     r_id int;
+ 
+Begin
+    m_id := FIND_MENU_ITEM_ID (menu_item_name );
+    r_id := FIND_RESTAURANT_ID (ctype_name);
+    if m_id > 0 and r_id > 0 then
+    insert into restaurant_inventory VALUES(m_id, r_id, menu_item_name, quantity);
+    end if;
+    exception
+    when no_data_found then
+    dbms_output.put_line('no such data found');
+End;
+
+begin
+add_into_restaurant_inventory('Ribs_R_US', 'burger', '50');
+add_into_restaurant_inventory('Ribs_R_US', 'fries', '150');
+add_into_restaurant_inventory('Bella_Italia', 'lasagna', '10');
+add_into_restaurant_inventory('Bella_Italia', 'meatballs', '5');
+end;
+
+
+
+---report menues
+declare 
+    restaurantinventory restaurant_inventory%rowtype; 
+    cursor c1 is select menu_item_id,restaurant_id,menu_item_name,quantity from 
+    restaurant_inventory;
+    x c1&rowtype;
+begin
+    open c1;
+    loop
+        fetch c1 into x;
+        exit when c1%notfound;
+        dbms_output('MenuItem ID - ' || x.menu_item_id || 'Restaurant ID - ' || 
+        x.restaurant_id ||'Menu_item_name - ' || x.menu_item_name ||'quantity is - '|| 
+        x.quantity);
+    end loop;
+    close c1;
+end; 
+
+
+*/
